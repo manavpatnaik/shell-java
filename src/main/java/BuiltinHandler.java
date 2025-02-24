@@ -1,9 +1,11 @@
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
 public class BuiltinHandler {
     private static Set<String> builtins = new HashSet<>(List.of("type", "echo", "exit", "pwd", "cd"));
+    private static String cwd = Paths.get("").toAbsolutePath().toString();
 
     public static boolean isBuiltin(String cmd) {
         return builtins.contains(cmd);
@@ -23,11 +25,14 @@ public class BuiltinHandler {
     }
 
     public static void handlePwd() {
-        System.out.println(System.getProperty("user.dir"));
+        System.out.println(cwd);
     }
 
     public static void handleCd(String s) {
-        if (!Files.isDirectory(Paths.get(s))) System.out.println("cd: " + s + ": No such file or directory");
-        else System.setProperty("user.dir", s);
+        if (!s.startsWith("/")) cwd = cwd + "/" + s;
+        else cwd = s;
+        Path path = Paths.get(cwd);
+        if (!Files.isDirectory(path)) System.out.println("cd: " + s + ": No such file or directory");
+        else cwd = path.normalize().toString();
     }
 }
