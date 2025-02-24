@@ -57,16 +57,23 @@ public class Main {
         while (true) {
             System.out.print("$ ");
             String input = scanner.nextLine();
+            String cmd = input.split(" ")[0];
             if (input.equals("exit 0")) {
                 scanner.close();
                 System.exit(0);
             }
-            if (input.startsWith("echo ")) System.out.println(removeFirstWord(input));
-            else if (input.startsWith("type")) {
+            if (cmd.equals("echo")) System.out.println(removeFirstWord(input));
+            else if (cmd.equals("type")) {
                 String command = removeFirstWord(input);
                 if (BINARIES.containsKey(command)) System.out.println(command + " is " + BINARIES.get(command));
                 else System.out.println(command + ": not found");
-            } else System.out.println(input + ": command not found");
+            } else if (BINARIES.containsKey(cmd)) {
+                Runtime runtime = Runtime.getRuntime();
+                Process process = runtime.exec(input);
+                byte[] output = process.getInputStream().readAllBytes();
+                System.out.print(new String(output));
+            }
+            else System.out.println(input + ": command not found");
         }
     }
 }
