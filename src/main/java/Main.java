@@ -1,7 +1,11 @@
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -11,11 +15,42 @@ public class Main {
         return s.substring(i+1);
     }
 
-    private final static Set<String> SHELL_BUILTINS = new HashSet<>(List.of("echo", "exit", "type"));
+    private static List<String> getEnvVars(String path) {
+        return Arrays.asList(path.split(":"));
+    }
+
+    private static List<String> getDirectoryFiles(String directory) throws IOException {
+        try (Stream<Path> stream = Files.list(Paths.get(directory))) {
+            return stream
+                    .filter(file -> !Files.isDirectory(file))
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private static Map<String, String> BINARIES = new HashMap<>();
+
+    private static void initializeBuiltins() {
+        List<String> shellBuiltnins = new ArrayList<>(List.of("type", "echo", "exit"));
+        String builtinInfoText = "a shell builtin";
+        for (String command : shellBuiltnins)
+            BINARIES.put(command, builtinInfoText);
+    }
+
+    private static void initializePath() throws IOException {
+        List<String> directories = getEnvVars(System.getenv("PATH"));
+        for (String directory : directories) {
+            List<String> commands = getDirectoryFiles(directory);
+            System.out.println("In " + directory + " -> " + commands);
+            for (String cmd : commands)
+                BINARIES.put(cmd, directory);
+        }
+    }
+
     public static void main(String[] args) throws Exception {
-        // Uncomment this block to pass the first stage
-
-
+        initializeBuiltins();
+        initializePath();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -29,7 +64,7 @@ public class Main {
             if (input.startsWith("echo ")) System.out.println(removeFirstWord(input));
             else if (input.startsWith("type")) {
                 String command = removeFirstWord(input);
-                if (SHELL_BUILTINS.contains(command)) System.out.println(command + " is a shell builtin");
+                if (BINARIES.containsKey(command)) System.out.println(command + " is " + BINARIES.get(command));
                 else System.out.println(command + ": not found");
             } else System.out.println(input + ": command not found");
         }
