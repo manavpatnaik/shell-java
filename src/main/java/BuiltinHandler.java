@@ -29,8 +29,10 @@ public class BuiltinHandler {
     }
 
     public static void handleCd(String s) {
-        if (!s.startsWith("/")) cwd = cwd + "/" + s;
+        if (s.equals("~")) cwd = System.getenv("HOME");
+        else if (!s.startsWith("/")) cwd = cwd + "/" + s;
         else cwd = s;
+
         Path path = Paths.get(cwd);
         if (!Files.isDirectory(path)) System.out.println("cd: " + s + ": No such file or directory");
         else cwd = path.normalize().toString();
