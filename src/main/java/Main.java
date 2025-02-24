@@ -44,7 +44,7 @@ public class Main {
         for (String directory : directories) {
             List<String> commands = getDirectoryFiles(directory);
             for (String cmd : commands)
-                BINARIES.put(cmd, directory);
+                if (!BINARIES.containsKey(cmd)) BINARIES.put(cmd, directory+"/"+cmd);
         }
     }
 
