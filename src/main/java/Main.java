@@ -42,7 +42,6 @@ public class Main {
         List<String> directories = getEnvVars(System.getenv("PATH"));
         for (String directory : directories) {
             List<String> commands = getDirectoryFiles(directory);
-            System.out.println("In " + directory + " -> " + commands);
             for (String cmd : commands)
                 BINARIES.put(cmd, directory);
         }
