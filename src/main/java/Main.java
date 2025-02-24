@@ -20,6 +20,7 @@ public class Main {
     }
 
     private static List<String> getDirectoryFiles(String directory) throws IOException {
+        if (!Files.isDirectory(Paths.get(directory))) return new ArrayList<>();
         try (Stream<Path> stream = Files.list(Paths.get(directory))) {
             return stream
                     .filter(file -> !Files.isDirectory(file))
