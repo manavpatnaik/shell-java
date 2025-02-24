@@ -9,8 +9,12 @@ public class Main {
         while (true) {
             System.out.print("$ ");
             String input = scanner.nextLine();
-            if (input.equals("exit 0")) System.exit(0);
-            System.out.println(input + ": command not found");
+            if (input.equals("exit 0")) {
+                scanner.close();
+                System.exit(0);
+            }
+            if (input.startsWith("echo ")) System.out.println(input.substring(5));
+            else System.out.println(input + ": command not found");
         }
     }
 }
