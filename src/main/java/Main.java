@@ -1,4 +1,3 @@
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,13 +8,16 @@ import java.util.stream.Stream;
 
 public class Main {
 
+    private static HashMap<String, String> BINARIES = new HashMap<>();
+
     private static String removeFirstWord(String s) {
         int i = 0;
         while (i < s.length() && s.charAt(i) != ' ') i++;
+        if (i == s.length()) return s;
         return s.substring(i+1);
     }
 
-    private static List<String> getEnvVars(String path) {
+    private static List<String> getSplitList(String path) {
         return Arrays.asList(path.split(":"));
     }
 
@@ -30,17 +32,16 @@ public class Main {
         }
     }
 
-    private static Map<String, String> BINARIES = new HashMap<>();
 
     private static void initializeBuiltins() {
-        List<String> shellBuiltnins = new ArrayList<>(List.of("type", "echo", "exit"));
+        List<String> shellBuiltnins = BuiltinHandler.getBuiltins();
         String builtinInfoText = "a shell builtin";
         for (String command : shellBuiltnins)
             BINARIES.put(command, builtinInfoText);
     }
 
     private static void initializePath() throws IOException {
-        List<String> directories = getEnvVars(System.getenv("PATH"));
+        List<String> directories = getSplitList(System.getenv("PATH"));
         for (String directory : directories) {
             List<String> commands = getDirectoryFiles(directory);
             for (String cmd : commands)
@@ -61,15 +62,14 @@ public class Main {
             if (input.equals("exit 0")) {
                 scanner.close();
                 System.exit(0);
-            }
-            if (cmd.equals("echo")) System.out.println(removeFirstWord(input));
-            else if (cmd.equals("type")) {
-                String command = removeFirstWord(input);
-                if (BINARIES.containsKey(command)) System.out.println(command + " is " + BINARIES.get(command));
-                else System.out.println(command + ": not found");
+            } else if (BuiltinHandler.isBuiltin(cmd)) {
+                String cmdRemoved = removeFirstWord(input);
+                if (cmd.equals("echo")) BuiltinHandler.handleEcho(cmdRemoved);
+                else if (cmd.equals("type")) BuiltinHandler.handleType(cmdRemoved, BINARIES);
+                else if (cmd.equals("pwd")) BuiltinHandler.handlePwd();
             } else if (BINARIES.containsKey(cmd)) {
                 Runtime runtime = Runtime.getRuntime();
-                Process process = runtime.exec(input);
+                Process process = runtime.exec(input.split(" "));
                 byte[] output = process.getInputStream().readAllBytes();
                 System.out.print(new String(output));
             }
