@@ -67,6 +67,7 @@ public class Main {
                 if (cmd.equals("echo")) BuiltinHandler.handleEcho(cmdRemoved);
                 else if (cmd.equals("type")) BuiltinHandler.handleType(cmdRemoved, BINARIES);
                 else if (cmd.equals("pwd")) BuiltinHandler.handlePwd();
+                else if (cmd.equals("cd")) BuiltinHandler.handleCd(cmdRemoved);
             } else if (BINARIES.containsKey(cmd)) {
                 Runtime runtime = Runtime.getRuntime();
                 Process process = runtime.exec(input.split(" "));
